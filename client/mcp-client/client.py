@@ -7,6 +7,7 @@ from mcp.client.stdio import stdio_client
 
 from anthropic import Anthropic
 from dotenv import load_dotenv
+import logging
 
 
 load_dotenv()
@@ -56,14 +57,18 @@ class MCPClient:
             }
         ]
         
+        #print(f'messages is {messages}')
+        
         response = await self.session.list_tools()
+        
+        #print(f'response is {response}')
         available_tools = [{
             "name": tool.name,
             "description": tool.description,
             "input_schema": tool.inputSchema
         } for tool in response.tools
         ] 
-        
+        #print(f'available tools = {available_tools}')
         response = self.anthropic.messages.create(
             model = "claude-3-5-sonnet-20241022",
             max_tokens = 1000,
@@ -71,21 +76,28 @@ class MCPClient:
             tools=available_tools
         )
         
+        #print(f'response is {response}')
+        
         final_text = []
         
         
         assistant_message_content = []
         for content in response.content:
+            #print(f'here is the content: {content}')
             if content.type == 'text':
+                #print('entering text block')
                 final_text.append(content.text)
                 assistant_message_content.append(content)
-            elif content.type == 'tool.use':
+            elif content.type == 'tool_use':
+                #print('entering tool use block')
                 tool_name = content.name
                 tool_args = content.input
+                
                 
                 result = await self.session.call_tool(tool_name, tool_args)
                 final_text.append(f"[Calling tool {tool_name} with args {tool_args}]")
                 
+                #print(f'result of calling tool {result}')
                 assistant_message_content.append(content)
                 messages.append({
                     "role": "assistant",
@@ -123,7 +135,7 @@ class MCPClient:
         
         while True:
             try:
-                query = input("/nQuery: ").strip()
+                query = input("\nQuery: ").strip()
                 
                 if query.lower() == 'quit':
                     break
@@ -141,6 +153,7 @@ class MCPClient:
         
         
 async def main():
+    """Initialize and run the MCP client with the provided server script path."""
     if len(sys.argv) < 2:
         print("usage: python client.py <path_to_server_script>")
         sys.exit(1)

@@ -1,0 +1,137 @@
+2025-06-10 14:42:22,520 - DEBUG - Initializing server 'weather'
+2025-06-10 14:42:22,521 - DEBUG - Registering handler for ListToolsRequest
+2025-06-10 14:42:22,521 - DEBUG - Registering handler for CallToolRequest
+2025-06-10 14:42:22,521 - DEBUG - Registering handler for ListResourcesRequest
+2025-06-10 14:42:22,521 - DEBUG - Registering handler for ReadResourceRequest
+2025-06-10 14:42:22,521 - DEBUG - Registering handler for PromptListRequest
+2025-06-10 14:42:22,521 - DEBUG - Registering handler for GetPromptRequest
+2025-06-10 14:42:22,521 - DEBUG - Registering handler for ListResourceTemplatesRequest
+2025-06-10 14:42:22,534 - INFO - Starting weather server
+2025-06-10 14:42:22,537 - DEBUG - Using proactor: IocpProactor
+2025-06-10 14:42:22,542 - DEBUG - Received message: root=InitializedNotification(method='notifications/initialized', params=None, jsonrpc='2.0')
+2025-06-10 14:42:22,543 - DEBUG - Received message: <mcp.shared.session.RequestResponder object at 0x000001E9C4C4FCD0>
+2025-06-10 14:42:22,543 - INFO - Processing request of type ListToolsRequest
+2025-06-10 14:42:22,543 - DEBUG - Dispatching request of type ListToolsRequest
+2025-06-10 14:42:22,543 - DEBUG - Response sent
+2025-06-10 14:42:27,745 - DEBUG - Received message: <mcp.shared.session.RequestResponder object at 0x000001E9C4C0CC50>
+2025-06-10 14:42:27,745 - INFO - Processing request of type ListToolsRequest
+2025-06-10 14:42:27,745 - DEBUG - Dispatching request of type ListToolsRequest
+2025-06-10 14:42:27,745 - DEBUG - Response sent
+2025-06-10 14:42:40,295 - DEBUG - Received message: <mcp.shared.session.RequestResponder object at 0x000001E9C4BD22D0>
+2025-06-10 14:42:40,296 - INFO - Processing request of type ListToolsRequest
+2025-06-10 14:42:40,296 - DEBUG - Dispatching request of type ListToolsRequest
+2025-06-10 14:42:40,296 - DEBUG - Response sent
+2025-06-10 14:42:42,699 - DEBUG - Received message: <mcp.shared.session.RequestResponder object at 0x000001E9C4C06810>
+2025-06-10 14:42:42,699 - INFO - Processing request of type CallToolRequest
+2025-06-10 14:42:42,699 - DEBUG - Dispatching request of type CallToolRequest
+2025-06-10 14:42:42,699 - INFO - Getting forecast for coordinates: 37.8857, -122.1181
+2025-06-10 14:42:42,699 - DEBUG - Making NWS request to: https://api.weather.gov/points/37.8857,-122.1181
+2025-06-10 14:42:42,725 - DEBUG - connect_tcp.started host='api.weather.gov' port=443 local_address=None timeout=30.0 socket_options=None
+2025-06-10 14:42:42,774 - DEBUG - connect_tcp.complete return_value=<httpcore._backends.anyio.AnyIOStream object at 0x000001E9C4C4F950>
+2025-06-10 14:42:42,775 - DEBUG - start_tls.started ssl_context=<ssl.SSLContext object at 0x000001E9C4CC29F0> server_hostname='api.weather.gov' timeout=30.0
+2025-06-10 14:42:42,801 - DEBUG - start_tls.complete return_value=<httpcore._backends.anyio.AnyIOStream object at 0x000001E9C4C04410>
+2025-06-10 14:42:42,801 - DEBUG - send_request_headers.started request=<Request [b'GET']>
+2025-06-10 14:42:42,801 - DEBUG - send_request_headers.complete
+2025-06-10 14:42:42,801 - DEBUG - send_request_body.started request=<Request [b'GET']>
+2025-06-10 14:42:42,801 - DEBUG - send_request_body.complete
+2025-06-10 14:42:42,801 - DEBUG - receive_response_headers.started request=<Request [b'GET']>
+2025-06-10 14:42:42,999 - DEBUG - receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'Server', b'nginx/1.20.1'), (b'Content-Type', b'application/geo+json'), (b'X-Powered-By', b'PHP/8.0.30'), (b'Access-Control-Allow-Origin', b'*'), (b'Access-Control-Expose-Headers', b'X-Correlation-Id, X-Request-Id, X-Server-Id'), (b'X-Request-ID', b'ec329de9-9dc7-43bd-ae33-185aa3966fd7'), (b'X-Correlation-ID', b'5b7d92e5'), (b'X-Server-ID', b'vm-lnx-nids-apiapp11.ncep.noaa.gov'), (b'Content-Encoding', b'gzip'), (b'Content-Length', b'804'), (b'Cache-Control', b'public, max-age=86400, s-maxage=120'), (b'Expires', b'Wed, 11 Jun 2025 21:42:38 GMT'), (b'Date', b'Tue, 10 Jun 2025 21:42:38 GMT'), (b'Connection', b'keep-alive'), (b'Vary', b'Accept-Encoding'), (b'X-Edge-Request-ID', b'94cecac9'), (b'Vary', b'Accept,Feature-Flags,Accept-Language'), (b'Strict-Transport-Security', b'max-age=31536000 ; includeSubDomains ; preload')])
+2025-06-10 14:42:42,999 - INFO - HTTP Request: GET https://api.weather.gov/points/37.8857,-122.1181 "HTTP/1.1 200 OK"
+2025-06-10 14:42:42,999 - DEBUG - receive_response_body.started request=<Request [b'GET']>
+2025-06-10 14:42:42,999 - DEBUG - receive_response_body.complete
+2025-06-10 14:42:42,999 - DEBUG - response_closed.started
+2025-06-10 14:42:42,999 - DEBUG - response_closed.complete
+2025-06-10 14:42:43,000 - DEBUG - Successful response from NWS API: 200
+2025-06-10 14:42:43,000 - DEBUG - close.started
+2025-06-10 14:42:43,000 - DEBUG - close.complete
+2025-06-10 14:42:43,000 - DEBUG - Making NWS request to: https://api.weather.gov/gridpoints/MTR/96,108/forecast
+2025-06-10 14:42:43,007 - DEBUG - connect_tcp.started host='api.weather.gov' port=443 local_address=None timeout=30.0 socket_options=None
+2025-06-10 14:42:43,024 - DEBUG - connect_tcp.complete return_value=<httpcore._backends.anyio.AnyIOStream object at 0x000001E9C4D76850>
+2025-06-10 14:42:43,026 - DEBUG - start_tls.started ssl_context=<ssl.SSLContext object at 0x000001E9C4CC2F90> server_hostname='api.weather.gov' timeout=30.0
+2025-06-10 14:42:43,053 - DEBUG - start_tls.complete return_value=<httpcore._backends.anyio.AnyIOStream object at 0x000001E9C4D76950>
+2025-06-10 14:42:43,053 - DEBUG - send_request_headers.started request=<Request [b'GET']>
+2025-06-10 14:42:43,054 - DEBUG - send_request_headers.complete
+2025-06-10 14:42:43,054 - DEBUG - send_request_body.started request=<Request [b'GET']>
+2025-06-10 14:42:43,054 - DEBUG - send_request_body.complete
+2025-06-10 14:42:43,054 - DEBUG - receive_response_headers.started request=<Request [b'GET']>
+2025-06-10 14:42:43,232 - DEBUG - receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'Server', b'nginx/1.20.1'), (b'Content-Type', b'application/geo+json'), (b'X-Powered-By', b'PHP/8.0.30'), (b'Last-Modified', b'Tue, 10 Jun 2025 20:26:22 GMT'), (b'Access-Control-Allow-Origin', b'*'), (b'Access-Control-Expose-Headers', b'X-Correlation-Id, X-Request-Id, X-Server-Id'), (b'X-Request-ID', b'267a14c3-71b6-455a-bf07-07f5247a6e77'), (b'X-Correlation-ID', b'5abd7988'), (b'X-Server-ID', b'vm-lnx-nids-apiapp3.ncep.noaa.gov'), (b'Content-Encoding', b'gzip'), (b'Content-Length', b'1291'), (b'Cache-Control', b'public, max-age=900, s-maxage=3600'), (b'Expires', b'Tue, 10 Jun 2025 21:57:38 GMT'), (b'Date', b'Tue, 10 Jun 2025 21:42:38 GMT'), (b'Connection', b'keep-alive'), (b'Vary', b'Accept-Encoding'), (b'X-Edge-Request-ID', b'94cecea5'), (b'Vary', b'Accept,Feature-Flags,Accept-Language'), (b'Strict-Transport-Security', b'max-age=31536000 ; includeSubDomains ; preload')])
+2025-06-10 14:42:43,233 - INFO - HTTP Request: GET https://api.weather.gov/gridpoints/MTR/96,108/forecast "HTTP/1.1 200 OK"
+2025-06-10 14:42:43,233 - DEBUG - receive_response_body.started request=<Request [b'GET']>
+2025-06-10 14:42:43,233 - DEBUG - receive_response_body.complete
+2025-06-10 14:42:43,233 - DEBUG - response_closed.started
+2025-06-10 14:42:43,233 - DEBUG - response_closed.complete
+2025-06-10 14:42:43,233 - DEBUG - Successful response from NWS API: 200
+2025-06-10 14:42:43,233 - DEBUG - close.started
+2025-06-10 14:42:43,234 - DEBUG - close.complete
+2025-06-10 14:42:43,234 - ERROR - Error processing forecast data: 'period'
+Traceback (most recent call last):
+  File "C:\Software-Projects\mcp-tutorial\weather\weather.py", line 106, in get_forecast
+    periods = forecast_data["properties"]["period"]
+              ~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+KeyError: 'period'
+2025-06-10 14:42:43,235 - DEBUG - Response sent
+2025-06-10 14:45:13,789 - DEBUG - Initializing server 'weather'
+2025-06-10 14:45:13,789 - DEBUG - Registering handler for ListToolsRequest
+2025-06-10 14:45:13,789 - DEBUG - Registering handler for CallToolRequest
+2025-06-10 14:45:13,789 - DEBUG - Registering handler for ListResourcesRequest
+2025-06-10 14:45:13,789 - DEBUG - Registering handler for ReadResourceRequest
+2025-06-10 14:45:13,789 - DEBUG - Registering handler for PromptListRequest
+2025-06-10 14:45:13,789 - DEBUG - Registering handler for GetPromptRequest
+2025-06-10 14:45:13,789 - DEBUG - Registering handler for ListResourceTemplatesRequest
+2025-06-10 14:45:13,798 - INFO - Starting weather server
+2025-06-10 14:45:13,802 - DEBUG - Using proactor: IocpProactor
+2025-06-10 14:45:13,807 - DEBUG - Received message: root=InitializedNotification(method='notifications/initialized', params=None, jsonrpc='2.0')
+2025-06-10 14:45:13,807 - DEBUG - Received message: <mcp.shared.session.RequestResponder object at 0x000001EAE1F82810>
+2025-06-10 14:45:13,807 - INFO - Processing request of type ListToolsRequest
+2025-06-10 14:45:13,808 - DEBUG - Dispatching request of type ListToolsRequest
+2025-06-10 14:45:13,808 - DEBUG - Response sent
+2025-06-10 14:45:23,948 - DEBUG - Received message: <mcp.shared.session.RequestResponder object at 0x000001EAE2F52050>
+2025-06-10 14:45:23,948 - INFO - Processing request of type ListToolsRequest
+2025-06-10 14:45:23,948 - DEBUG - Dispatching request of type ListToolsRequest
+2025-06-10 14:45:23,949 - DEBUG - Response sent
+2025-06-10 14:45:26,518 - DEBUG - Received message: <mcp.shared.session.RequestResponder object at 0x000001EAE2F52090>
+2025-06-10 14:45:26,519 - INFO - Processing request of type CallToolRequest
+2025-06-10 14:45:26,519 - DEBUG - Dispatching request of type CallToolRequest
+2025-06-10 14:45:26,519 - INFO - Getting forecast for coordinates: 37.8857, -122.118
+2025-06-10 14:45:26,519 - DEBUG - Making NWS request to: https://api.weather.gov/points/37.8857,-122.118
+2025-06-10 14:45:26,548 - DEBUG - connect_tcp.started host='api.weather.gov' port=443 local_address=None timeout=30.0 socket_options=None
+2025-06-10 14:45:26,668 - DEBUG - connect_tcp.complete return_value=<httpcore._backends.anyio.AnyIOStream object at 0x000001EAE2FCF7D0>
+2025-06-10 14:45:26,668 - DEBUG - start_tls.started ssl_context=<ssl.SSLContext object at 0x000001EAE30329F0> server_hostname='api.weather.gov' timeout=30.0
+2025-06-10 14:45:26,701 - DEBUG - start_tls.complete return_value=<httpcore._backends.anyio.AnyIOStream object at 0x000001EAE30B7D90>
+2025-06-10 14:45:26,701 - DEBUG - send_request_headers.started request=<Request [b'GET']>
+2025-06-10 14:45:26,701 - DEBUG - send_request_headers.complete
+2025-06-10 14:45:26,701 - DEBUG - send_request_body.started request=<Request [b'GET']>
+2025-06-10 14:45:26,701 - DEBUG - send_request_body.complete
+2025-06-10 14:45:26,701 - DEBUG - receive_response_headers.started request=<Request [b'GET']>
+2025-06-10 14:45:26,738 - DEBUG - receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'Server', b'nginx/1.20.1'), (b'Content-Type', b'application/geo+json'), (b'X-Powered-By', b'PHP/8.0.30'), (b'Access-Control-Allow-Origin', b'*'), (b'Access-Control-Expose-Headers', b'X-Correlation-Id, X-Request-Id, X-Server-Id'), (b'X-Request-ID', b'd935502a-d06e-42fa-81ea-c71659d506d1'), (b'X-Correlation-ID', b'5b1143a3'), (b'X-Server-ID', b'vm-lnx-nids-apiapp12.ncep.noaa.gov'), (b'Content-Encoding', b'gzip'), (b'Content-Length', b'803'), (b'Cache-Control', b'public, max-age=84157, s-maxage=120'), (b'Expires', b'Wed, 11 Jun 2025 21:07:59 GMT'), (b'Date', b'Tue, 10 Jun 2025 21:45:22 GMT'), (b'Connection', b'keep-alive'), (b'Vary', b'Accept-Encoding'), (b'X-Edge-Request-ID', b'94d7cb5c'), (b'Vary', b'Accept,Feature-Flags,Accept-Language'), (b'Strict-Transport-Security', b'max-age=31536000 ; includeSubDomains ; preload')])
+2025-06-10 14:45:26,738 - INFO - HTTP Request: GET https://api.weather.gov/points/37.8857,-122.118 "HTTP/1.1 200 OK"
+2025-06-10 14:45:26,739 - DEBUG - receive_response_body.started request=<Request [b'GET']>
+2025-06-10 14:45:26,739 - DEBUG - receive_response_body.complete
+2025-06-10 14:45:26,739 - DEBUG - response_closed.started
+2025-06-10 14:45:26,739 - DEBUG - response_closed.complete
+2025-06-10 14:45:26,739 - DEBUG - Successful response from NWS API: 200
+2025-06-10 14:45:26,739 - DEBUG - close.started
+2025-06-10 14:45:26,739 - DEBUG - close.complete
+2025-06-10 14:45:26,740 - DEBUG - Making NWS request to: https://api.weather.gov/gridpoints/MTR/96,108/forecast
+2025-06-10 14:45:26,746 - DEBUG - connect_tcp.started host='api.weather.gov' port=443 local_address=None timeout=30.0 socket_options=None
+2025-06-10 14:45:26,768 - DEBUG - connect_tcp.complete return_value=<httpcore._backends.anyio.AnyIOStream object at 0x000001EAE30E1ED0>
+2025-06-10 14:45:26,768 - DEBUG - start_tls.started ssl_context=<ssl.SSLContext object at 0x000001EAE3033020> server_hostname='api.weather.gov' timeout=30.0
+2025-06-10 14:45:26,799 - DEBUG - start_tls.complete return_value=<httpcore._backends.anyio.AnyIOStream object at 0x000001EAE2F637D0>
+2025-06-10 14:45:26,799 - DEBUG - send_request_headers.started request=<Request [b'GET']>
+2025-06-10 14:45:26,799 - DEBUG - send_request_headers.complete
+2025-06-10 14:45:26,799 - DEBUG - send_request_body.started request=<Request [b'GET']>
+2025-06-10 14:45:26,800 - DEBUG - send_request_body.complete
+2025-06-10 14:45:26,800 - DEBUG - receive_response_headers.started request=<Request [b'GET']>
+2025-06-10 14:45:26,833 - DEBUG - receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'Server', b'nginx/1.20.1'), (b'Content-Type', b'application/geo+json'), (b'X-Powered-By', b'PHP/8.0.30'), (b'Last-Modified', b'Tue, 10 Jun 2025 20:26:22 GMT'), (b'Access-Control-Allow-Origin', b'*'), (b'Access-Control-Expose-Headers', b'X-Correlation-Id, X-Request-Id, X-Server-Id'), (b'X-Request-ID', b'267a14c3-71b6-455a-bf07-07f5247a6e77'), (b'X-Correlation-ID', b'5abd7988'), (b'X-Server-ID', b'vm-lnx-nids-apiapp3.ncep.noaa.gov'), (b'Content-Encoding', b'gzip'), (b'Content-Length', b'1291'), (b'Cache-Control', b'public, max-age=736, s-maxage=3600'), (b'Expires', b'Tue, 10 Jun 2025 21:57:38 GMT'), (b'Date', b'Tue, 10 Jun 2025 21:45:22 GMT'), (b'Connection', b'keep-alive'), (b'Vary', b'Accept-Encoding'), (b'X-Edge-Request-ID', b'94d7cc99'), (b'Vary', b'Accept,Feature-Flags,Accept-Language'), (b'Strict-Transport-Security', b'max-age=31536000 ; includeSubDomains ; preload')])
+2025-06-10 14:45:26,833 - INFO - HTTP Request: GET https://api.weather.gov/gridpoints/MTR/96,108/forecast "HTTP/1.1 200 OK"
+2025-06-10 14:45:26,833 - DEBUG - receive_response_body.started request=<Request [b'GET']>
+2025-06-10 14:45:26,833 - DEBUG - receive_response_body.complete
+2025-06-10 14:45:26,833 - DEBUG - response_closed.started
+2025-06-10 14:45:26,833 - DEBUG - response_closed.complete
+2025-06-10 14:45:26,833 - DEBUG - Successful response from NWS API: 200
+2025-06-10 14:45:26,833 - DEBUG - close.started
+2025-06-10 14:45:26,835 - DEBUG - close.complete
+2025-06-10 14:45:26,835 - DEBUG - Forecast data structure: dict_keys(['@context', 'type', 'geometry', 'properties'])
+2025-06-10 14:45:26,835 - DEBUG - Forecast properties structure: dict_keys(['units', 'forecastGenerator', 'generatedAt', 'updateTime', 'validTimes', 'elevation', 'periods'])
+2025-06-10 14:45:26,835 - INFO - Successfully retrieved forecast for coordinates: 37.8857, -122.118
+2025-06-10 14:45:26,835 - DEBUG - Response sent
