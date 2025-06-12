@@ -3,6 +3,7 @@ import httpx
 from mcp.server.fastmcp import FastMCP
 import logging
 import os
+import anthropic
 
 # Configure logging to file
 log_file = os.path.join(os.path.dirname(__file__), 'weather_server.log')
@@ -82,6 +83,39 @@ async def get_alerts(state: str) -> str:
     alerts = [format_alert(feature) for feature in data["features"]]
     logger.info(f"Found {len(alerts)} alerts for state: {state}")
     return "\n---\n".join(alerts)
+
+
+@mcp.tool()
+async def get_outfit(tempurature: float, windSpeed: float, windDirection: float, deatiledForecast: str):
+    """ get outfit based on the weather"""
+    logger.info(f'Getting outfit based on weather')
+    
+    client = anthropic.Anthropic()
+    
+    query = f"""
+    Temperature: {tempurature}
+    Wind Speed: {windSpeed}
+    Wind Direction: {windDirection}
+    Detailed Forecast: {deatiledForecast}
+    
+    """
+    
+    message = {
+        "role": "user",
+        "content": query
+    }
+    
+    response = client.messages.create(
+        
+        model = "claude-3-5-sonnet-20241022",
+        max_tokens = 1000,
+        messages = message
+
+    )
+    return response
+    
+    
+    
 
 @mcp.tool()
 async def get_forecast(latitude: float, longitude: float) -> str:
