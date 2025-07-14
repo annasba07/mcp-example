@@ -1,0 +1,13 @@
+# Core dependencies
+fastmcp>=0.1.0
+pydub>=0.25.1
+mutagen>=1.47.0
+
+# Optional AI dependencies (install with: pip install -r requirements-ai.txt)
+# openai-whisper>=20231117
+# torch>=2.0.0
+# torchaudio>=2.0.0
+
+# Optional TTS dependencies  
+# gTTS>=2.4.0
+# pyttsx3>=2.90
