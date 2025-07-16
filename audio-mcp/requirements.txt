@@ -11,3 +11,8 @@ mutagen>=1.47.0
 # Optional TTS dependencies  
 # gTTS>=2.4.0
 # pyttsx3>=2.90
+
+# Advanced speech processing
+# pyannote.audio>=3.1.0  # Speaker diarization
+# hume>=0.4.0  # Emotion detection
+# httpx>=0.24.0  # HTTP client for Hume API

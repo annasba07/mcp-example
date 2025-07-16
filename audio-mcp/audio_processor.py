@@ -5,7 +5,7 @@ from typing import Optional, Dict, Any, List
 import tempfile
 import asyncio
 from pydub import AudioSegment
-from .utils import AudioUtils
+from utils import AudioUtils
 
 logger = logging.getLogger(__name__)
 
@@ -309,3 +309,383 @@ class AudioProcessor:
         except Exception as e:
             logger.error(f"Error generating speech: {e}")
             return {"error": str(e)}
+    
+    async def diarize_speakers(self, file_path: str) -> Dict[str, Any]:
+        """Perform speaker diarization to identify who spoke when"""
+        if not AudioUtils.validate_audio_file(file_path):
+            return {"error": "Invalid or unsupported audio file"}
+        
+        try:
+            from pyannote.audio import Pipeline
+            
+            # Load the speaker diarization pipeline
+            logger.info("Loading speaker diarization pipeline...")
+            pipeline = Pipeline.from_pretrained("pyannote/speaker-diarization-3.1")
+            
+            # Perform diarization
+            logger.info(f"Performing speaker diarization on: {file_path}")
+            diarization = pipeline(file_path)
+            
+            # Process results
+            speakers = {}
+            segments = []
+            
+            for turn, _, speaker in diarization.itertracks(yield_label=True):
+                speaker_id = f"Speaker_{speaker}"
+                
+                # Track speaker info
+                if speaker_id not in speakers:
+                    speakers[speaker_id] = {
+                        "total_speaking_time": 0,
+                        "segments": 0
+                    }
+                
+                # Add segment
+                segment_duration = turn.end - turn.start
+                speakers[speaker_id]["total_speaking_time"] += segment_duration
+                speakers[speaker_id]["segments"] += 1
+                
+                segments.append({
+                    "start": round(turn.start, 2),
+                    "end": round(turn.end, 2),
+                    "duration": round(segment_duration, 2),
+                    "speaker": speaker_id
+                })
+            
+            # Sort segments by start time
+            segments.sort(key=lambda x: x["start"])
+            
+            # Format speaker summary
+            total_duration = max([seg["end"] for seg in segments]) if segments else 0
+            
+            for speaker_id in speakers:
+                speakers[speaker_id]["total_speaking_time"] = round(speakers[speaker_id]["total_speaking_time"], 2)
+                speakers[speaker_id]["percentage"] = round(
+                    (speakers[speaker_id]["total_speaking_time"] / total_duration) * 100, 1
+                ) if total_duration > 0 else 0
+            
+            result = {
+                "status": "success",
+                "file_path": file_path,
+                "total_duration": round(total_duration, 2),
+                "num_speakers": len(speakers),
+                "speakers": speakers,
+                "segments": segments,
+                "total_segments": len(segments)
+            }
+            
+            return result
+            
+        except ImportError:
+            return {
+                "error": "pyannote.audio not installed. Install with: pip install pyannote.audio",
+                "suggestion": "Run: pip install pyannote.audio torch torchaudio"
+            }
+        except Exception as e:
+            logger.error(f"Error performing speaker diarization: {e}")
+            return {"error": str(e)}
+    
+    async def detect_emotions(self, file_path: str, api_key: str) -> Dict[str, Any]:
+        """Detect emotions in audio using Hume AI API"""
+        if not AudioUtils.validate_audio_file(file_path):
+            return {"error": "Invalid or unsupported audio file"}
+        
+        if not api_key:
+            return {"error": "Hume API key not provided"}
+        
+        try:
+            import httpx
+            import base64
+            import json
+            
+            # Read and encode audio file
+            with open(file_path, "rb") as audio_file:
+                audio_data = base64.b64encode(audio_file.read()).decode('utf-8')
+            
+            # Get file extension for mime type
+            file_ext = Path(file_path).suffix.lower()
+            mime_type_map = {
+                '.wav': 'audio/wav',
+                '.mp3': 'audio/mpeg',
+                '.m4a': 'audio/mp4',
+                '.flac': 'audio/flac',
+                '.ogg': 'audio/ogg'
+            }
+            mime_type = mime_type_map.get(file_ext, 'audio/wav')
+            
+            # Prepare request payload
+            payload = {
+                "data": audio_data,
+                "type": mime_type
+            }
+            
+            headers = {
+                "X-Hume-Api-Key": api_key,
+                "Content-Type": "application/json"
+            }
+            
+            # Make API request
+            logger.info(f"Sending audio to Hume API for emotion detection...")
+            
+            async with httpx.AsyncClient(timeout=60.0) as client:
+                response = await client.post(
+                    "https://api.hume.ai/v0/batch/jobs",
+                    headers=headers,
+                    json={
+                        "models": {
+                            "prosody": {}
+                        },
+                        "transcription": {
+                            "identify_speakers": True
+                        },
+                        "notify": False,
+                        "urls": [],
+                        "files": [payload]
+                    }
+                )
+                
+                if response.status_code != 200:
+                    return {"error": f"Hume API error: {response.status_code} - {response.text}"}
+                
+                job_data = response.json()
+                job_id = job_data.get("job_id")
+                
+                if not job_id:
+                    return {"error": "Failed to get job ID from Hume API"}
+                
+                # Poll for results
+                max_attempts = 30
+                for attempt in range(max_attempts):
+                    await asyncio.sleep(2)  # Wait 2 seconds between polls
+                    
+                    status_response = await client.get(
+                        f"https://api.hume.ai/v0/batch/jobs/{job_id}",
+                        headers=headers
+                    )
+                    
+                    if status_response.status_code != 200:
+                        continue
+                    
+                    status_data = status_response.json()
+                    state = status_data.get("state", {}).get("status")
+                    
+                    if state == "COMPLETED":
+                        # Get results
+                        results_response = await client.get(
+                            f"https://api.hume.ai/v0/batch/jobs/{job_id}/predictions",
+                            headers=headers
+                        )
+                        
+                        if results_response.status_code == 200:
+                            results = results_response.json()
+                            return self._process_hume_results(results, file_path)
+                        else:
+                            return {"error": f"Failed to get results: {results_response.status_code}"}
+                    
+                    elif state == "FAILED":
+                        return {"error": "Hume API job failed"}
+                
+                return {"error": "Timeout waiting for Hume API results"}
+            
+        except ImportError:
+            return {
+                "error": "httpx not installed. Install with: pip install httpx",
+                "suggestion": "Run: pip install httpx"
+            }
+        except Exception as e:
+            logger.error(f"Error detecting emotions: {e}")
+            return {"error": str(e)}
+    
+    def _process_hume_results(self, results: Dict[str, Any], file_path: str) -> Dict[str, Any]:
+        """Process Hume API results into a structured format"""
+        try:
+            # Extract prosody predictions
+            predictions = results[0].get("results", {}).get("predictions", [])
+            
+            if not predictions:
+                return {"error": "No emotion predictions found in results"}
+            
+            prosody_data = predictions[0].get("models", {}).get("prosody", {}).get("grouped_predictions", [])
+            
+            if not prosody_data:
+                return {"error": "No prosody data found in results"}
+            
+            # Process emotion segments
+            segments = []
+            emotion_summary = {}
+            
+            for group in prosody_data:
+                for prediction in group.get("predictions", []):
+                    time_data = prediction.get("time", {})
+                    emotions = prediction.get("emotions", [])
+                    
+                    # Get top emotions
+                    top_emotions = sorted(emotions, key=lambda x: x["score"], reverse=True)[:5]
+                    
+                    segment = {
+                        "start": time_data.get("begin", 0),
+                        "end": time_data.get("end", 0),
+                        "duration": time_data.get("end", 0) - time_data.get("begin", 0),
+                        "emotions": [
+                            {
+                                "name": emotion["name"],
+                                "score": round(emotion["score"], 4),
+                                "confidence": emotion["score"]
+                            }
+                            for emotion in top_emotions
+                        ],
+                        "dominant_emotion": top_emotions[0]["name"] if top_emotions else "unknown"
+                    }
+                    
+                    segments.append(segment)
+                    
+                    # Track emotion summary
+                    for emotion in top_emotions:
+                        emotion_name = emotion["name"]
+                        if emotion_name not in emotion_summary:
+                            emotion_summary[emotion_name] = {
+                                "total_score": 0,
+                                "count": 0,
+                                "segments": []
+                            }
+                        
+                        emotion_summary[emotion_name]["total_score"] += emotion["score"]
+                        emotion_summary[emotion_name]["count"] += 1
+                        emotion_summary[emotion_name]["segments"].append(len(segments) - 1)
+            
+            # Calculate average scores
+            for emotion_name in emotion_summary:
+                emotion_summary[emotion_name]["average_score"] = round(
+                    emotion_summary[emotion_name]["total_score"] / emotion_summary[emotion_name]["count"], 4
+                )
+            
+            # Sort emotions by average score
+            sorted_emotions = sorted(
+                emotion_summary.items(),
+                key=lambda x: x[1]["average_score"],
+                reverse=True
+            )
+            
+            result = {
+                "status": "success",
+                "file_path": file_path,
+                "total_segments": len(segments),
+                "segments": segments,
+                "emotion_summary": dict(sorted_emotions),
+                "dominant_emotions": [emotion[0] for emotion in sorted_emotions[:5]],
+                "average_emotion_scores": {
+                    emotion[0]: emotion[1]["average_score"]
+                    for emotion in sorted_emotions[:10]
+                }
+            }
+            
+            return result
+            
+        except Exception as e:
+            logger.error(f"Error processing Hume results: {e}")
+            return {"error": f"Error processing emotion results: {str(e)}"}
+    
+    async def analyze_conversation(self, file_path: str, hume_api_key: Optional[str] = None) -> Dict[str, Any]:
+        """Comprehensive conversation analysis combining transcription, diarization, and emotion detection"""
+        if not AudioUtils.validate_audio_file(file_path):
+            return {"error": "Invalid or unsupported audio file"}
+        
+        logger.info(f"Starting comprehensive conversation analysis for: {file_path}")
+        
+        try:
+            # Get basic audio info
+            audio_info = self.get_audio_info(file_path)
+            
+            results = {
+                "status": "success",
+                "file_path": file_path,
+                "audio_info": audio_info,
+                "analysis_components": []
+            }
+            
+            # 1. Transcription
+            logger.info("Starting transcription...")
+            transcription_result = await self.transcribe_audio(file_path, "base")
+            if "error" not in transcription_result:
+                results["transcription"] = transcription_result
+                results["analysis_components"].append("transcription")
+            else:
+                results["transcription_error"] = transcription_result["error"]
+            
+            # 2. Speaker Diarization
+            logger.info("Starting speaker diarization...")
+            diarization_result = await self.diarize_speakers(file_path)
+            if "error" not in diarization_result:
+                results["diarization"] = diarization_result
+                results["analysis_components"].append("diarization")
+            else:
+                results["diarization_error"] = diarization_result["error"]
+            
+            # 3. Emotion Detection (if API key provided)
+            if hume_api_key:
+                logger.info("Starting emotion detection...")
+                emotion_result = await self.detect_emotions(file_path, hume_api_key)
+                if "error" not in emotion_result:
+                    results["emotions"] = emotion_result
+                    results["analysis_components"].append("emotions")
+                else:
+                    results["emotions_error"] = emotion_result["error"]
+            else:
+                results["emotions_error"] = "Hume API key not provided"
+            
+            # 4. Combine results for insights
+            if len(results["analysis_components"]) >= 2:
+                results["insights"] = self._generate_conversation_insights(results)
+            
+            return results
+            
+        except Exception as e:
+            logger.error(f"Error in conversation analysis: {e}")
+            return {"error": str(e)}
+    
+    def _generate_conversation_insights(self, analysis_results: Dict[str, Any]) -> Dict[str, Any]:
+        """Generate insights from combined analysis results"""
+        insights = {}
+        
+        try:
+            # Speaking time analysis
+            if "diarization" in analysis_results:
+                diarization = analysis_results["diarization"]
+                insights["speaking_distribution"] = {
+                    "num_speakers": diarization.get("num_speakers", 0),
+                    "most_active_speaker": max(
+                        diarization.get("speakers", {}).items(),
+                        key=lambda x: x[1]["total_speaking_time"]
+                    )[0] if diarization.get("speakers") else None,
+                    "speaker_balance": "balanced" if len(diarization.get("speakers", {})) > 1 else "monologue"
+                }
+            
+            # Emotional patterns
+            if "emotions" in analysis_results:
+                emotions = analysis_results["emotions"]
+                insights["emotional_patterns"] = {
+                    "dominant_emotion": emotions.get("dominant_emotions", [None])[0],
+                    "emotion_variety": len(emotions.get("emotion_summary", {})),
+                    "emotional_intensity": max(
+                        emotions.get("average_emotion_scores", {}).values()
+                    ) if emotions.get("average_emotion_scores") else 0
+                }
+            
+            # Conversation dynamics
+            if "transcription" in analysis_results and "diarization" in analysis_results:
+                transcription = analysis_results["transcription"]
+                diarization = analysis_results["diarization"]
+                
+                insights["conversation_dynamics"] = {
+                    "total_duration": diarization.get("total_duration", 0),
+                    "words_per_minute": len(transcription.get("transcript", "").split()) / (
+                        diarization.get("total_duration", 1) / 60
+                    ) if diarization.get("total_duration") else 0,
+                    "turn_taking": diarization.get("total_segments", 0) / diarization.get("num_speakers", 1)
+                }
+            
+            return insights
+            
+        except Exception as e:
+            logger.error(f"Error generating insights: {e}")
+            return {"error": f"Error generating insights: {str(e)}"}

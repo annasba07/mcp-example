@@ -22,8 +22,13 @@ tts = [
     "gTTS>=2.4.0",
     "pyttsx3>=2.90"
 ]
+advanced = [
+    "pyannote.audio>=3.1.0",
+    "hume>=0.4.0",
+    "httpx>=0.24.0"
+]
 all = [
-    "audio-mcp[ai,tts]"
+    "audio-mcp[ai,tts,advanced]"
 ]
 
 [build-system]
